@@ -16,3 +16,4 @@ test = false
 
 [dependencies]
 anyhow = { version = "1.0.104", features = ["backtrace"] }
+log = { version = "0.4.34", features = ["alloc"] }
