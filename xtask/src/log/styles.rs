@@ -1,25 +1,25 @@
 use owo_colors::Style;
 
 /// Unstyled.
-const UNSTYLED: Style = owo_colors::Style::new().remove_all_effects();
+pub(super) const UNSTYLED: Style = owo_colors::Style::new().remove_all_effects();
 
 /// Bright white and bold for blocks.
-const BLOCK: Style = owo_colors::Style::new().bright_white().bold();
+pub(super) const BLOCK: Style = owo_colors::Style::new().bright_white().bold();
 
 /// Dimmed and italic for modules.
-const MODULE: Style = owo_colors::Style::new().white().dimmed().italic();
+pub(super) const MODULE: Style = owo_colors::Style::new().white().dimmed().italic();
 
 /// Dimmed for trace messages.
-const TRACE: Style = owo_colors::Style::new().dimmed();
+pub(super) const TRACE: Style = owo_colors::Style::new().dimmed();
 
 /// Dimmed for debug messages.
-const DEBUG: Style = TRACE;
+pub(super) const DEBUG: Style = TRACE;
 
 /// Green and bold for info messages.
-const INFO: Style = owo_colors::Style::new().green().bold();
+pub(super) const INFO: Style = owo_colors::Style::new().green().bold();
 
 /// Yellow and bold for warning messages.
-const WARN: Style = owo_colors::Style::new().yellow().bold();
+pub(super) const WARN: Style = owo_colors::Style::new().yellow().bold();
 
 /// Red and bold for error messages.
-const ERROR: Style = owo_colors::Style::new().red().bold();
+pub(super) const ERROR: Style = owo_colors::Style::new().red().bold();
