@@ -5,7 +5,10 @@ use clap::{Parser, Subcommand};
 
 /// A command-line interface for building and running the project.
 #[derive(Subcommand)]
-enum Commands {}
+enum Commands {
+    /// Checks whether the project is set up correctly and all dependencies are installed.
+    Check,
+}
 
 // CMD
 #[derive(Parser)]
@@ -16,6 +19,15 @@ struct Cli {
 }
 
 /// Parses the command-line arguments and executes the appropriate command.
-pub fn parse() {
-    Cli::parse();
+pub fn parse() -> anyhow::Result<()> {
+    let d = Cli::parse();
+
+    match d.command {
+        Commands::Check => check()?,
+    }
+    Ok(())
+}
+
+fn check() -> anyhow::Result<()> {
+    Ok(())
 }
