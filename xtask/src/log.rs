@@ -1,17 +1,43 @@
 //! # Log
 //! Logging utilities for the xtask CLI.
 
-use log::{Level, Record};
+use log::{Level, LevelFilter, Log, Record};
 use owo_colors::OwoColorize;
 
-use styles::{BLOCK, DEBUG, ERROR, INFO, TRACE, WARN};
-
-use crate::log::styles::MODULE;
+use styles::{BLOCK, DEBUG, ERROR, INFO, MODULE, TRACE, WARN};
 
 mod styles;
 
 /// Simple logger that prints messages to stdout or stderr.
 struct XTaskLogger;
+
+static LOGGER: XTaskLogger = XTaskLogger;
+
+/// Installs the xtask logger and selects a verbosity based on the build profile.
+pub fn init() -> Result<(), log::SetLoggerError> {
+    log::set_logger(&LOGGER)?;
+    log::set_max_level(if cfg!(debug_assertions) {
+        LevelFilter::Trace
+    } else {
+        LevelFilter::Info
+    });
+    Ok(())
+}
+
+impl Log for XTaskLogger {
+    fn enabled(&self, metadata: &log::Metadata) -> bool {
+        metadata.level().to_level_filter() <= log::max_level()
+    }
+
+    fn flush(&self) {}
+
+    fn log(&self, record: &Record) {
+        if !self.enabled(record.metadata()) {
+            return;
+        }
+        write_message(&format_message(record), record.level());
+    }
+}
 
 /// Writes the message to stdout or stderr depending on the log level.
 ///
@@ -29,12 +55,8 @@ fn write_message(message: &str, level: Level) {
     }
 }
 
-/// Formats the message with the appropriate style based on the log level.
-///
-/// # Arguments
-/// * `message` - The message to format.
-/// * `record` - The log record containing the log level and other useful info.
-fn format_message(message: &str, record: Record) -> String {
+/// Formats a log record with the appropriate level and location styles.
+fn format_message(record: &Record) -> String {
     let binding = record.level();
     let (level_style, separator_style) = match record.level() {
         Level::Trace => (TRACE, BLOCK.dimmed()),
@@ -53,9 +75,9 @@ fn format_message(message: &str, record: Record) -> String {
             record.file().unwrap_or("unknown").style(MODULE),
             ":".style(MODULE),
             record.line().unwrap_or(0).to_string().style(MODULE),
-            message
+            record.args()
         )
     } else {
-        format!("{level} {separator} {message}")
+        format!("{level} {separator} {}", record.args())
     }
 }

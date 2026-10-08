@@ -1,8 +1,5 @@
 use owo_colors::Style;
 
-/// Unstyled.
-pub(super) const UNSTYLED: Style = owo_colors::Style::new().remove_all_effects();
-
 /// Bright white and bold for blocks.
 pub(super) const BLOCK: Style = owo_colors::Style::new().bright_white().bold();
 
