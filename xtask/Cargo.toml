@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition.workspace = true
+readme.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+bench = false
+doc = false
+doctest = false
+name = "xtask"
+path = "src/main.rs"
+test = false
