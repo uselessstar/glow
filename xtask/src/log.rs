@@ -36,31 +36,26 @@ fn write_message(message: &str, level: Level) {
 /// * `record` - The log record containing the log level and other useful info.
 fn format_message(message: &str, record: Record) -> String {
     let binding = record.level();
-    let level = match record.level() {
-        Level::Trace => binding.style(TRACE),
-        Level::Debug => binding.style(DEBUG),
-        Level::Info => binding.style(INFO),
-        Level::Warn => binding.style(WARN),
-        Level::Error => binding.style(ERROR),
+    let (level_style, separator_style) = match record.level() {
+        Level::Trace => (TRACE, BLOCK.dimmed()),
+        Level::Debug => (DEBUG, BLOCK.dimmed()),
+        Level::Info => (INFO, BLOCK.green()),
+        Level::Warn => (WARN, BLOCK.yellow()),
+        Level::Error => (ERROR, BLOCK.red()),
     };
+    let level = binding.style(level_style);
+    let separator = "|".style(separator_style);
     if cfg!(debug_assertions) {
         format!(
-            "{}{}{} {}{}{}: {}",
-            "[".style(BLOCK),
+            "{} {} {}{}{}: {}",
             level,
-            "]".style(BLOCK),
+            separator,
             record.file().unwrap_or("unknown").style(MODULE),
             ":".style(MODULE),
             record.line().unwrap_or(0).to_string().style(MODULE),
             message
         )
     } else {
-        format!(
-            "{}{}{} {}",
-            "[".style(BLOCK),
-            level,
-            "]".style(BLOCK),
-            message
-        )
+        format!("{level} {separator} {message}")
     }
 }
