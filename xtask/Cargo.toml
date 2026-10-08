@@ -13,3 +13,6 @@ doctest = false
 name = "xtask"
 path = "src/main.rs"
 test = false
+
+[dependencies]
+anyhow = { version = "1.0.104", features = ["backtrace"] }
