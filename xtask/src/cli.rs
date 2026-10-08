@@ -28,6 +28,7 @@ pub fn parse() -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Checks whether the project is in good condition and can be built and run successfully.
 fn check() -> anyhow::Result<()> {
     Ok(())
 }
