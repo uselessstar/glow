@@ -83,3 +83,9 @@ pub fn write(s: &str) {
         write_byte(byte);
     }
 }
+
+/// Writes a string followed by a newline to the serial port.
+pub fn write_line(s: &str) {
+    write(s);
+    write("\r\n");
+}
