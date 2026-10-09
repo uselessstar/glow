@@ -1,3 +1,3 @@
 #![no_std]
 
-mod serial;
+pub mod serial;
