@@ -3,6 +3,10 @@
 
 use clap::{Parser, Subcommand};
 
+use check::check;
+
+mod check;
+
 /// A command-line interface for building and running the project.
 #[derive(Subcommand)]
 enum Commands {
@@ -24,10 +28,5 @@ pub fn parse() -> anyhow::Result<()> {
     match d.command {
         Commands::Check => check()?,
     }
-    Ok(())
-}
-
-/// Checks whether the project is in good condition and can be built and run successfully.
-fn check() -> anyhow::Result<()> {
     Ok(())
 }
