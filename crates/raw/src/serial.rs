@@ -55,3 +55,16 @@ unsafe fn inb(port: u16) -> u8 {
 unsafe fn is_transmit_empty() -> bool {
     unsafe { inb(COM1 + 5) & 0x20 != 0 }
 }
+
+/// Initializes the serial port for communication.
+pub fn init() {
+    unsafe {
+        outb(COM1 + 1, 0x00); // Disable interrupts
+        outb(COM1 + 3, 0x80); // Enable DLAB
+        outb(COM1, 0x03); // 38400 baud (divisor low)
+        outb(COM1 + 1, 0x00); // (divisor high)
+        outb(COM1 + 3, 0x03); // 8 bits, 1 stop, no parity
+        outb(COM1 + 2, 0xC7); // Enable FIFO
+        outb(COM1 + 4, 0x0B); // IRQs enabled
+    }
+}
