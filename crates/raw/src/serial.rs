@@ -2,6 +2,9 @@
 
 use core::arch::asm;
 
+/// The I/O port address for the first serial port (COM1).
+const COM1: u16 = 0x3F8;
+
 /// Writes a byte to an I/O port.
 ///
 /// # Safety
@@ -38,4 +41,17 @@ unsafe fn inb(port: u16) -> u8 {
         asm!("in al, dx", out("al") value, in("dx") port);
     }
     value
+}
+
+/// Checks if the transmit buffer of the serial port is empty.
+///
+/// # Safety
+/// This function performs raw I/O port access. The caller must ensure:
+/// - The serial port is properly initialized and configured.
+/// - The operation does not race with other code accessing the same port.
+///
+/// Incorrect use can lead to data loss or undefined behavior.
+#[inline]
+unsafe fn is_transmit_empty() -> bool {
+    unsafe { inb(COM1 + 5) & 0x20 != 0 }
 }
