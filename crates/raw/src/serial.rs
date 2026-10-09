@@ -76,3 +76,10 @@ pub fn write_byte(byte: u8) {
     }
     unsafe { outb(COM1, byte) }
 }
+
+/// Writes a string to the serial port.
+pub fn write(s: &str) {
+    for byte in s.bytes() {
+        write_byte(byte);
+    }
+}
