@@ -68,3 +68,11 @@ pub fn init() {
         outb(COM1 + 4, 0x0B); // IRQs enabled
     }
 }
+
+/// Writes a byte to the serial port.
+pub fn write_byte(byte: u8) {
+    while !unsafe { is_transmit_empty() } {
+        core::hint::spin_loop();
+    }
+    unsafe { outb(COM1, byte) }
+}
