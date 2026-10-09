@@ -10,7 +10,6 @@ enum Commands {
     Check,
 }
 
-// CMD
 #[derive(Parser)]
 #[command(version, about)]
 struct Cli {
