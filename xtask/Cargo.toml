@@ -17,5 +17,8 @@ test = false
 [dependencies]
 anyhow = { version = "1.0.104", features = ["backtrace"] }
 clap = { version = "4.6.7", features = ["derive", "help", "suggestions", "unicode"] }
+flate2 = { version = "1.1.10", features = ["zlib"] }
 log = { version = "0.4.34", features = ["alloc"] }
 owo-colors = { version = "4.4.0", features = ["supports-colors"] }
+tar = "0.4.46"
+ureq = "3.4.2"
