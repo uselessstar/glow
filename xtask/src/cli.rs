@@ -4,14 +4,18 @@
 use clap::{Parser, Subcommand};
 
 use check::check;
+use setup::setup;
 
 mod check;
+mod setup;
 
 /// A command-line interface for building and running the project.
 #[derive(Subcommand)]
 enum Commands {
     /// Checks whether the project is set up correctly and all dependencies are installed.
     Check,
+    /// Sets up the project for development.
+    Setup,
 }
 
 #[derive(Parser)]
@@ -27,6 +31,7 @@ pub fn parse() -> anyhow::Result<()> {
 
     match d.command {
         Commands::Check => check()?,
+        Commands::Setup => setup()?,
     }
     Ok(())
 }
