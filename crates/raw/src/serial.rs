@@ -44,15 +44,8 @@ unsafe fn inb(port: u16) -> u8 {
 }
 
 /// Checks if the transmit buffer of the serial port is empty.
-///
-/// # Safety
-/// This function performs raw I/O port access. The caller must ensure:
-/// - The serial port is properly initialized and configured.
-/// - The operation does not race with other code accessing the same port.
-///
-/// Incorrect use can lead to data loss or undefined behavior.
 #[inline]
-unsafe fn is_transmit_empty() -> bool {
+fn is_transmit_empty() -> bool {
     unsafe { inb(COM1 + 5) & 0x20 != 0 }
 }
 
@@ -71,7 +64,7 @@ pub fn init() {
 
 /// Writes a byte to the serial port.
 pub fn write_byte(byte: u8) {
-    while !unsafe { is_transmit_empty() } {
+    while !is_transmit_empty() {
         core::hint::spin_loop();
     }
     unsafe { outb(COM1, byte) }
