@@ -1,3 +1,5 @@
+//! A simple logger implementation that writes to the serial port.
+
 use core::fmt::Write;
 
 use log::{Level, Log, Metadata};
@@ -32,6 +34,7 @@ impl Log for GlowLogger {
     }
 }
 
+/// Initializes the logger and sets the maximum log level based on the build configuration.
 pub fn init() {
     log::set_logger(&LOGGER).unwrap();
     if cfg!(debug_assertions) {
