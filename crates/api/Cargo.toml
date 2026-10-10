@@ -13,4 +13,5 @@ path = "src/lib.rs"
 test = false
 
 [dependencies]
+log = { version = "0.4.34", default-features = false }
 raw_api = { path = "../raw" }
