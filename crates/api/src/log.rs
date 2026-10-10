@@ -4,6 +4,8 @@ use log::{Level, Log, Metadata};
 
 struct GlowLogger;
 
+static LOGGER: GlowLogger = GlowLogger;
+
 impl Log for GlowLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         if cfg!(debug_assertions) {
@@ -27,5 +29,14 @@ impl Log for GlowLogger {
             )
             .unwrap();
         }
+    }
+}
+
+pub fn init() {
+    log::set_logger(&LOGGER).unwrap();
+    if cfg!(debug_assertions) {
+        log::set_max_level(log::LevelFilter::Trace);
+    } else {
+        log::set_max_level(log::LevelFilter::Info);
     }
 }

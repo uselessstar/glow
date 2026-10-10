@@ -1,4 +1,4 @@
 #![no_std]
 
-mod log;
+pub mod log;
 pub mod serial;
