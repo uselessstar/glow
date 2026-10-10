@@ -12,7 +12,7 @@ impl Write for SerialWriter {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
         for b in s.bytes() {
             if b == b'\n' {
-                write_byte(b'\r');
+                write_byte(b'\r'); // Write carriage return before newline for proper formatting in terminals.
             }
             write_byte(b);
         }
