@@ -23,7 +23,17 @@ impl Log for GlowLogger {
             let target = record.target();
             let args = record.args();
             // `Log::log` has no error channel; don't panic while the UART is unavailable.
-            let _ = super::serial::write_fmt(format_args!("[{}] {}: {}\n", level, target, args));
+            if cfg!(debug_assertions) {
+                let file = record.file().unwrap_or("unknown");
+                let line = record.line().unwrap_or(0);
+                let _ = super::serial::write_fmt(format_args!(
+                    "[{}] {}:{} {}: {}\n",
+                    level, file, line, target, args
+                ));
+            } else {
+                let _ =
+                    super::serial::write_fmt(format_args!("[{}] {}: {}\n", level, target, args));
+            }
         }
     }
 }
@@ -42,13 +52,13 @@ pub fn init() {
 pub fn print_panic(info: &PanicInfo) -> Result<(), super::serial::SerialError> {
     if let Some(location) = info.location() {
         super::serial::write_fmt(format_args!(
-            "[PANIC] {}:{}:{}: {}",
+            "[PANIC] {}:{}:{}: {}\n",
             location.file(),
             location.line(),
             location.column(),
             info.message()
         ))
     } else {
-        super::serial::write_fmt(format_args!("[PANIC] {}", info.message()))
+        super::serial::write_fmt(format_args!("[PANIC] {}\n", info.message()))
     }
 }

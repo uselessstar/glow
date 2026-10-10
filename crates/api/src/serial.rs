@@ -76,12 +76,14 @@ fn write_byte_locked(byte: u8) -> Result<(), SerialError> {
 
 struct FormattedWriter {
     error: Option<SerialError>,
+    previous_was_carriage_return: bool,
 }
 
 impl Write for FormattedWriter {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for byte in s.bytes() {
             if byte == b'\n'
+                && !self.previous_was_carriage_return
                 && let Err(error) = write_byte_locked(b'\r')
             {
                 self.error = Some(error);
@@ -91,6 +93,7 @@ impl Write for FormattedWriter {
                 self.error = Some(error);
                 return Err(fmt::Error);
             }
+            self.previous_was_carriage_return = byte == b'\r';
         }
         Ok(())
     }
@@ -99,7 +102,10 @@ impl Write for FormattedWriter {
 /// Writes formatted text as one synchronized operation, converting newlines to CRLF.
 pub fn write_fmt(args: fmt::Arguments<'_>) -> Result<(), SerialError> {
     let _guard = SerialGuard::acquire()?;
-    let mut writer = FormattedWriter { error: None };
+    let mut writer = FormattedWriter {
+        error: None,
+        previous_was_carriage_return: false,
+    };
     let result = fmt::write(&mut writer, args);
 
     if let Some(error) = writer.error {
