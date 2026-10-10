@@ -1,6 +1,7 @@
 //! A simple logger implementation that writes to the serial port.
 
 use core::fmt::Write;
+use core::panic::PanicInfo;
 
 use log::{Level, Log, Metadata};
 
@@ -42,4 +43,18 @@ pub fn init() {
     } else {
         log::set_max_level(log::LevelFilter::Info);
     }
+}
+
+/// Prints panic information directly to the serial port, independently of log levels.
+pub fn print_panic(info: &PanicInfo) {
+    let location = info.location().unwrap();
+    writeln!(
+        super::serial::SerialWriter,
+        "[PANIC] {}:{}:{}: {}",
+        location.file(),
+        location.line(),
+        location.column(),
+        info.message()
+    )
+    .unwrap();
 }

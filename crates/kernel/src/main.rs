@@ -5,13 +5,13 @@
 extern "C" fn krnl_main() -> ! {
     api::serial::init();
     api::log::init();
-
     loop {
         core::hint::spin_loop();
     }
 }
 
 #[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    api::log::print_panic(info);
     loop {}
 }
