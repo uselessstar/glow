@@ -42,7 +42,7 @@ impl SerialGuard {
 
         if flags & (1 << 9) != 0 {
             unsafe {
-                asm!("sti", options(nomem, nostack, preserves_flags));
+                asm!("sti", options(nomem, nostack));
             }
         }
         Err(SerialError::LockTimeout)
@@ -54,7 +54,7 @@ impl Drop for SerialGuard {
         SERIAL_LOCK.store(false, Ordering::Release);
         if self.interrupts_enabled {
             unsafe {
-                asm!("sti", options(nomem, nostack, preserves_flags));
+                asm!("sti", options(nomem, nostack));
             }
         }
     }
