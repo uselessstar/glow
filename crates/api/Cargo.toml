@@ -9,7 +9,6 @@ publish.workspace = true
 bench = false
 doc = true
 doctest = false
-name = "krnlapi"
 path = "src/lib.rs"
 test = false
 
