@@ -34,6 +34,9 @@ SECTIONS
     . = ALIGN(PAGE_SIZE);
     .data : AT(ADDR(.data) - KERNEL_VMA)
     {
+        KEEP(*(.requests_start))
+        KEEP(*(.requests))
+        KEEP(*(.requests_end))
         *(.data .data.*)
         *(.got .got.*)
         *(.init_array .init_array.*)
