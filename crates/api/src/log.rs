@@ -1,4 +1,7 @@
 //! A simple logger implementation that writes to the serial port.
+//!
+//! Debug builds accept all log levels; non-debug builds accept levels through
+//! the info level.
 
 use core::panic::PanicInfo;
 
@@ -39,6 +42,10 @@ impl Log for GlowLogger {
 }
 
 /// Initializes the logger and sets the maximum log level based on the build configuration.
+///
+/// # Panics
+///
+/// Panics if another logger has already been installed.
 pub fn init() {
     log::set_logger(&LOGGER).unwrap();
     if cfg!(debug_assertions) {
@@ -49,6 +56,11 @@ pub fn init() {
 }
 
 /// Prints panic information directly to the serial port, independently of log levels.
+///
+/// # Errors
+///
+/// Returns an error if serial output cannot acquire its lock, the UART
+/// transmitter times out, or formatting fails.
 pub fn print_panic(info: &PanicInfo) -> Result<(), super::serial::SerialError> {
     if let Some(location) = info.location() {
         super::serial::write_fmt(format_args!(

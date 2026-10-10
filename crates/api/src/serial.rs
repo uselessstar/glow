@@ -1,19 +1,29 @@
 //! Safe, synchronized serial output built on raw UART access.
+//!
+//! Call `init` before writing so the COM1 UART is configured. Formatted
+//! operations are serialized across callers and normalize line endings to
+//! CRLF.
 
 use core::arch::asm;
 use core::fmt::{self, Write};
 use core::sync::atomic::{AtomicBool, Ordering};
 
-pub use raw_api::serial::init;
-
 const POLL_LIMIT: usize = 10_000_000;
 static SERIAL_LOCK: AtomicBool = AtomicBool::new(false);
+
+/// Configures the COM1 UART for serial output.
+pub fn init() {
+    raw_api::serial::init();
+}
 
 /// Errors that can occur while writing to the serial port.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SerialError {
+    /// The serial output lock could not be acquired before the polling limit.
     LockTimeout,
+    /// The UART did not become ready before the polling limit.
     TransmitTimeout,
+    /// Formatting failed while producing the output.
     FormattingError,
 }
 
@@ -100,6 +110,11 @@ impl Write for FormattedWriter {
 }
 
 /// Writes formatted text as one synchronized operation, converting newlines to CRLF.
+///
+/// # Errors
+///
+/// Returns an error if the output lock cannot be acquired, the UART transmitter
+/// times out, or formatting fails.
 pub fn write_fmt(args: fmt::Arguments<'_>) -> Result<(), SerialError> {
     let _guard = SerialGuard::acquire()?;
     let mut writer = FormattedWriter {
@@ -115,11 +130,21 @@ pub fn write_fmt(args: fmt::Arguments<'_>) -> Result<(), SerialError> {
 }
 
 /// Writes text as one synchronized operation, converting newlines to CRLF.
+///
+/// # Errors
+///
+/// Returns an error if the output lock cannot be acquired, the UART transmitter
+/// times out, or formatting fails.
 pub fn write(s: &str) -> Result<(), SerialError> {
     write_fmt(format_args!("{s}"))
 }
 
 /// Writes text followed by a newline as one synchronized operation.
+///
+/// # Errors
+///
+/// Returns an error if the output lock cannot be acquired, the UART transmitter
+/// times out, or formatting fails.
 pub fn write_line(s: &str) -> Result<(), SerialError> {
     write_fmt(format_args!("{s}\n"))
 }
@@ -128,6 +153,11 @@ pub fn write_line(s: &str) -> Result<(), SerialError> {
 ///
 /// Each `write_str` call is synchronized; use [`write_fmt`] to keep a complete
 /// formatted message from interleaving with other writers.
+///
+/// # Errors
+///
+/// Its [`fmt::Write::write_str`] implementation returns [`fmt::Error`] when
+/// serial output fails.
 pub struct SerialWriter;
 
 impl Write for SerialWriter {
