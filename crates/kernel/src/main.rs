@@ -3,6 +3,9 @@
 
 #[unsafe(no_mangle)]
 extern "C" fn krnl_main() -> ! {
+    api::serial::init();
+    api::log::init();
+
     loop {
         core::hint::spin_loop();
     }
