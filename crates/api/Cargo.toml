@@ -1,18 +1,17 @@
 [package]
-name = "kernel"
+name = "api"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
 
-[[bin]]
+[lib]
 bench = false
-doc = false
+doc = true
 doctest = false
-name = "kernel"
-path = "src/main.rs"
+path = "src/lib.rs"
 test = false
 
 [dependencies]
-api = { path = "../api" }
 log = { version = "0.4.34", default-features = false }
+raw_api = { path = "../raw" }

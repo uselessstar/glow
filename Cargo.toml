@@ -10,7 +10,7 @@ license = "ISC"
 publish = false
 
 [profile.dev]
-opt-level = 1
+opt-level = 0
 debug = "full"
 debug-assertions = true
 overflow-checks = true
