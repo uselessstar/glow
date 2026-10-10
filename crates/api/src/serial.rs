@@ -1,7 +1,7 @@
 //! Provides high-level and safe access to hardware I/O ports, specifically for serial communication.
 
 use core::fmt::Write;
-use raw_api::serial::write;
+use raw_api::serial::write_byte;
 
 pub use raw_api::serial::init;
 
@@ -10,7 +10,12 @@ pub struct SerialWriter;
 
 impl Write for SerialWriter {
     fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        write(s);
+        for b in s.bytes() {
+            if b == b'\n' {
+                write_byte(b'\r');
+            }
+            write_byte(b);
+        }
         Ok(())
     }
 }
