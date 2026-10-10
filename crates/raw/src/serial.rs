@@ -1,21 +1,11 @@
-//! Provides low-level access to hardware I/O ports, specifically for serial communication.
+//! Raw UART access through x86 I/O ports.
 
 use core::arch::asm;
 
-/// The I/O port address for the first serial port (COM1).
 const COM1: u16 = 0x3F8;
+const LINE_STATUS: u16 = COM1 + 5;
+const TRANSMIT_EMPTY: u8 = 1 << 5;
 
-/// Writes a byte to an I/O port.
-///
-/// # Safety
-///
-/// This function performs raw I/O port access. The caller must ensure:
-///
-/// - `port` is a valid I/O port for the target hardware.
-/// - Writing `value` to `port` is safe for the current system state.
-/// - The operation does not race with other code accessing the same port.
-///
-/// Incorrect use can corrupt hardware state, cause data loss, or hang the system.
 #[inline]
 unsafe fn outb(port: u16, value: u8) {
     unsafe {
@@ -23,17 +13,6 @@ unsafe fn outb(port: u16, value: u8) {
     }
 }
 
-/// Reads a byte from an I/O port.
-///
-/// # Safety
-///
-/// This function performs raw I/O port access. The caller must ensure:
-///
-/// - `port` is a valid I/O port for the target hardware.
-/// - Reading from `port` is safe for the current system state.
-/// - The operation does not race with other code accessing the same port.
-///
-/// Incorrect use can read garbage, cause data loss, or hang the system.
 #[inline]
 unsafe fn inb(port: u16) -> u8 {
     let value: u8;
@@ -43,42 +22,39 @@ unsafe fn inb(port: u16) -> u8 {
     value
 }
 
-/// Checks if the transmit buffer of the serial port is empty.
-#[inline]
-fn is_transmit_empty() -> bool {
-    unsafe { inb(COM1 + 5) & 0x20 != 0 }
-}
-
-/// Initializes the serial port for communication.
+/// Initializes the first UART (COM1) for 38400 baud, 8-N-1.
+///
+/// This requires permission to access x86 I/O ports and should be called before
+/// using the UART.
 pub fn init() {
     unsafe {
-        outb(COM1 + 1, 0x00); // Disable interrupts
-        outb(COM1 + 3, 0x80); // Enable DLAB
-        outb(COM1, 0x03); // 38400 baud (divisor low)
-        outb(COM1 + 1, 0x00); // (divisor high)
-        outb(COM1 + 3, 0x03); // 8 bits, 1 stop, no parity
-        outb(COM1 + 2, 0xC7); // Enable FIFO
-        outb(COM1 + 4, 0x0B); // IRQs enabled
+        outb(COM1 + 1, 0x00); // Disable UART interrupts
+        outb(COM1 + 3, 0x80); // Enable divisor-latch access
+        outb(COM1, 0x03); // Divisor low: 38400 baud
+        outb(COM1 + 1, 0x00); // Divisor high
+        outb(COM1 + 3, 0x03); // 8 data bits, 1 stop bit, no parity
+        outb(COM1 + 2, 0xC7); // Enable and clear FIFO
+        outb(COM1 + 4, 0x0B); // Assert DTR, RTS, and OUT2
     }
 }
 
-/// Writes a byte to the serial port.
-pub fn write_byte(byte: u8) {
-    while !is_transmit_empty() {
-        core::hint::spin_loop();
-    }
-    unsafe { outb(COM1, byte) }
+/// Returns whether the UART can accept another byte.
+///
+/// This reads the COM1 line-status register directly.
+#[inline]
+pub fn transmit_empty() -> bool {
+    unsafe { inb(LINE_STATUS) & TRANSMIT_EMPTY != 0 }
 }
 
-/// Writes a string to the serial port.
-pub fn write(s: &str) {
-    for byte in s.bytes() {
-        write_byte(byte);
+/// Writes a byte directly to COM1 without waiting for the transmitter.
+///
+/// # Safety
+///
+/// The caller must ensure that the transmitter is ready (see [`transmit_empty`])
+/// and that x86 I/O port access is permitted in the current execution context.
+#[inline]
+pub unsafe fn write_byte(byte: u8) {
+    unsafe {
+        outb(COM1, byte);
     }
-}
-
-/// Writes a string followed by a newline to the serial port.
-pub fn write_line(s: &str) {
-    write(s);
-    write("\r\n");
 }

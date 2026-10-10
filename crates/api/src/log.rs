@@ -1,6 +1,5 @@
 //! A simple logger implementation that writes to the serial port.
 
-use core::fmt::Write;
 use core::panic::PanicInfo;
 
 use log::{Level, Log, Metadata};
@@ -23,14 +22,8 @@ impl Log for GlowLogger {
             let level = record.level();
             let target = record.target();
             let args = record.args();
-            writeln!(
-                super::serial::SerialWriter,
-                "[{}] {}: {}",
-                level,
-                target,
-                args
-            )
-            .unwrap();
+            // `Log::log` has no error channel; don't panic while the UART is unavailable.
+            let _ = super::serial::write_fmt(format_args!("[{}] {}: {}\n", level, target, args));
         }
     }
 }
@@ -46,18 +39,16 @@ pub fn init() {
 }
 
 /// Prints panic information directly to the serial port, independently of log levels.
-pub fn print_panic(info: &PanicInfo) {
+pub fn print_panic(info: &PanicInfo) -> Result<(), super::serial::SerialError> {
     if let Some(location) = info.location() {
-        writeln!(
-            super::serial::SerialWriter,
+        super::serial::write_fmt(format_args!(
             "[PANIC] {}:{}:{}: {}",
             location.file(),
             location.line(),
             location.column(),
             info.message()
-        )
-        .unwrap();
+        ))
     } else {
-        writeln!(super::serial::SerialWriter, "[PANIC] {}", info.message()).unwrap();
+        super::serial::write_fmt(format_args!("[PANIC] {}", info.message()))
     }
 }

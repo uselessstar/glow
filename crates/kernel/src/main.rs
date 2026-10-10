@@ -1,10 +1,13 @@
 #![no_std]
 #![no_main]
 
+use log::info;
+
 #[unsafe(no_mangle)]
 extern "C" fn krnl_main() -> ! {
     api::serial::init();
     api::log::init();
+    info!("Test build v{}", env!("CARGO_PKG_VERSION"));
     loop {
         core::hint::spin_loop();
     }
@@ -12,6 +15,6 @@ extern "C" fn krnl_main() -> ! {
 
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
-    api::log::print_panic(info);
+    let _ = api::log::print_panic(info);
     loop {}
 }
