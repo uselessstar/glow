@@ -9,6 +9,5 @@ publish.workspace = true
 bench = false
 doc = true
 doctest = false
-name = "krnlrawapi"
 path = "src/lib.rs"
 test = false
