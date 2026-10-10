@@ -1,6 +1,6 @@
 use std::{
     fs::{self, create_dir_all},
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::Command,
 };
 
@@ -11,6 +11,7 @@ const TARGET: &str = "x86_64-unknown-none";
 
 pub fn run() -> anyhow::Result<()> {
     let root = project_root();
+    let kernel_version = kernel_version(&root)?;
     let limine_efi = root.join("boot/BOOTX64.EFI");
     let firmware_code = root.join("firmware/OVMF_CODE.fd");
     let firmware_vars = root.join("firmware/OVMF_VARS.fd");
@@ -57,7 +58,8 @@ pub fn run() -> anyhow::Result<()> {
     .context("Failed to copy Limine wallpaper")?;
     fs::write(
         esp_dir.join("limine.conf"),
-        r#"timeout: no
+        format!(
+            r#"timeout: no
 wallpaper: boot():/boot/glowday.png
 interface_branding_color: 000000
 interface_help_color: 000000
@@ -70,8 +72,8 @@ term_foreground: 000000
 term_background_bright: ff000000
 term_foreground_bright: 000000
 
-/Glow OS
-    comment: Glow OS — Test Build
+/Glow OS v{kernel_version}
+    comment: Glow OS — Kernel v{kernel_version}
     protocol: limine
     path: boot():/boot/glowkrnl
     if_fw_type: uefi
@@ -81,7 +83,8 @@ term_foreground_bright: 000000
     comment: order-priority=10
     protocol: efi
     path: boot():/EFI/BOOT/BOOTX64.EFI
-"#,
+"#
+        ),
     )
     .context("Failed to generate the Limine configuration")?;
     fs::copy(
@@ -137,4 +140,35 @@ fn project_root() -> PathBuf {
         .parent()
         .expect("xtask must live inside a Cargo workspace")
         .to_path_buf()
+}
+
+fn kernel_version(root: &Path) -> anyhow::Result<String> {
+    let manifest_path = root.join("crates/kernel/Cargo.toml");
+    let output = Command::new("cargo")
+        .current_dir(root)
+        .args(["metadata", "--format-version", "1", "--no-deps"])
+        .output()
+        .context("Failed to retrieve workspace metadata from Cargo")?;
+    if !output.status.success() {
+        bail!(
+            "Cargo metadata failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+    }
+
+    let metadata: serde_json::Value = serde_json::from_slice(&output.stdout)
+        .context("Cargo returned invalid JSON workspace metadata")?;
+    metadata["packages"]
+        .as_array()
+        .context("Cargo metadata does not contain a packages array")?
+        .iter()
+        .find(|package| {
+            package["name"] == "kernel"
+                && package["manifest_path"]
+                    .as_str()
+                    .is_some_and(|path| Path::new(path) == manifest_path)
+        })
+        .and_then(|package| package["version"].as_str())
+        .map(str::to_owned)
+        .context("Cargo metadata does not contain the kernel package or its version")
 }
