@@ -47,14 +47,17 @@ pub fn init() {
 
 /// Prints panic information directly to the serial port, independently of log levels.
 pub fn print_panic(info: &PanicInfo) {
-    let location = info.location().unwrap();
-    writeln!(
-        super::serial::SerialWriter,
-        "[PANIC] {}:{}:{}: {}",
-        location.file(),
-        location.line(),
-        location.column(),
-        info.message()
-    )
-    .unwrap();
+    if let Some(location) = info.location() {
+        writeln!(
+            super::serial::SerialWriter,
+            "[PANIC] {}:{}:{}: {}",
+            location.file(),
+            location.line(),
+            location.column(),
+            info.message()
+        )
+        .unwrap();
+    } else {
+        writeln!(super::serial::SerialWriter, "[PANIC] {}", info.message()).unwrap();
+    }
 }
