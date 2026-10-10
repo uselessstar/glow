@@ -15,5 +15,9 @@ pub static BASE_REVISION: limine::BaseRevision = limine::BaseRevision::new();
 pub static MEMORY_MAP: limine::request::MemmapRequest = limine::request::MemmapRequest::new();
 
 #[used]
+#[unsafe(link_section = ".requests")]
+pub static HHDM: limine::request::HhdmRequest = limine::request::HhdmRequest::new();
+
+#[used]
 #[unsafe(link_section = ".requests_end")]
 pub static REQUESTS_END: limine::RequestsEndMarker = limine::RequestsEndMarker::new();

@@ -8,6 +8,7 @@ extern "C" fn krnl_main() -> ! {
     api::serial::init();
     api::log::init();
     info!("Test build v{}", env!("CARGO_PKG_VERSION"));
+
     loop {
         core::hint::spin_loop();
     }
