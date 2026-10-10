@@ -1,0 +1,25 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition.workspace = true
+readme.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+bench = false
+doc = false
+doctest = false
+name = "xtask"
+path = "src/main.rs"
+test = false
+
+[dependencies]
+anyhow = { version = "1.0.104", features = ["backtrace"] }
+clap = { version = "4.6.7", features = ["derive", "help", "suggestions", "unicode"] }
+flate2 = { version = "1.1.10", features = ["zlib"] }
+log = "0.4.34"
+owo-colors = { version = "4.4.0", features = ["supports-colors"] }
+serde_json = "1.0.152"
+tar = "0.4.46"
+ureq = "3.4.2"

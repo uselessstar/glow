@@ -1,0 +1,17 @@
+[package]
+name = "api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+bench = false
+doc = true
+doctest = false
+path = "src/lib.rs"
+test = false
+
+[dependencies]
+log = { version = "0.4.34", default-features = false }
+raw_api = { path = "../raw" }

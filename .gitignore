@@ -1,0 +1,6 @@
+target/
+boot/
+!crates/api/src/boot/
+!crates/api/src/boot/**
+esp/
+firmware/
